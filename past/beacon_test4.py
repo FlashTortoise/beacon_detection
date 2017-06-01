@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import logging
 import numpy as np
 # 1280*720
 
@@ -15,7 +16,10 @@ import time
 t.update_config(TORTOISE_WALK_PERIOD = 0.1)
 eye = t.peripheral.eye
 
+
 class beacon_detection(t.Task):
+    logger = logging.getLogger('tortoise.task.beacon')
+
     def __init__(self):
         super(beacon_detection, self).__init__()
         self.flag_beacon_end1 = False
@@ -51,6 +55,7 @@ class beacon_detection(t.Task):
             else:
                 total_area.append(0)
         total_area.sort(reverse=True)
+
         area_max = total_area[0]
         total_area.pop(0)
         total_area_n1 = sum(total_area)
@@ -99,18 +104,16 @@ class beacon_detection(t.Task):
             self.flag_beacon_end1 = True
         else:
             if left_boundary <= cx <= right_boundary:
-                # pass
                 # print 'middle'
+                self.logger.info('beacon detected at center')
                 l, r=[0.4, 0.4]
             if cx < left_boundary:
                 # turn left
-                # pass
-                # print 'need to turn left'
+                self.logger.info('beacon detected at left')
                 l, r = [0.1, 0.4]
             if cx > right_boundary:
                 # turn right
-                # pass
-                # print 'need to turn right'
+                self.logger.info('beacon detected at right')
                 l, r = [0.4, 0.1]
 
         print "left"+str(l)
