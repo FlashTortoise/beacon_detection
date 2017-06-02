@@ -4,6 +4,8 @@ import sys
 
 import tool
 import tortoise as t
+
+from car_find_color import ColorTracingTask
 from beacon_detect import BeaconDetectionTask
 from turning import Turning
 from wall_following_task_indoor import PlanterWallFollower
@@ -18,6 +20,9 @@ class Patio2(t.Task):
 
     def __init__(self):
         super(Patio2, self).__init__()
+
+        self.color_block_tracing = ColorTracingTask()
+
         self.b_2planter_task = BeaconDetectionTask()
         self.t_at_planter = Turning(-110)
         self.wall_following_task = PlanterWallFollower()
@@ -37,7 +42,11 @@ class Patio2(t.Task):
 
         if False:
             pass
+        elif not self.color_block_tracing.flag_cfc_end:
+            print '\033[0;32m{}\033[0m'.format('Color block tracing')
+            self.color_block_tracing.step()
         elif not self.b_2planter_task.done:
+            print '\033[0;32m{}\033[0m'.format('Go to planner')
             self.b_2planter_task.step()
             print 'Area: {:9.1f}, direction: {:8s}'.format(
                 self.b_2planter_task.beacon_area, self.b_2planter_task.turn_dir)
