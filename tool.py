@@ -33,20 +33,35 @@ def run_n_time_flag(self, distinct_name, time=1):
 
 class StepManager(object):
     def __init__(self):
-        self.task = None
-
-    def add(self, task):
-        if callable(task):
-            self.task = task
-
-    def remove(self):
-        self.task = None
+        self.tasks = deque()
 
     def need_step(self):
-        return True if self.task is not None else False
+        task_info = None
+        try:
+            task_info = self.tasks[0]
+        except IndexError:
+            return False
+
+        remaining_times = task_info['remaining_times']
+        if task_info['remaining_times'] is not None:
+            if task_info['remaining_times'] > 0:
+                return True
+            else:
+                raise Exception('Bad condition')
+
+    def add_n_times(self, task, times=1):
+        if not callable(task):
+            raise Exception('task is not callable')
+
+        self.tasks.append(dict(callable=task, remaining_times=times))
 
     def step(self):
-        return self.task()
+        self.tasks[0]['remaining_times'] -= 1
+        task = self.tasks[0]['callable']
+        if self.tasks[0]['remaining_times'] == 0:
+            self.tasks.popleft()
+
+        return task()
 
 
 if __name__ == '__main__':
@@ -58,14 +73,18 @@ if __name__ == '__main__':
         def step(self):
             if self.stepm.need_step():
                 self.stepm.step()
-                self.stepm.remove()
                 return
 
             print 'raw running'
             if self.executed_count == 5:
                 def other_fun():
                     print 'other fun run'
-                self.stepm.add(other_fun)
+                self.stepm.add_n_times(other_fun)
+
+
+                def another_fun():
+                    print 'another fun run'
+                self.stepm.add_n_times(another_fun, 2)
 
             self.executed_count += 1
 
