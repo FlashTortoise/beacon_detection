@@ -75,11 +75,10 @@ class Patio2(t.Task):
                 lambda: not self.t_at_planter.finish_flag
             )
         elif (
-            tool.run_n_time_flag(self, 'faehiudcjr',time=duration2times(20 * 2))
+            tool.run_n_time_flag(self, 'faehiudcjr',time=duration2times(20))
             or not self.wall_following_task.done
         ):
-            if tool.run_n_time_flag(
-                    self, 'faehiudcjr', time=20*2):
+            if tool.run_n_time_flag(self, 'faehiudcjr', peek=True):
                 self.wall_following_task.done = False
             self.wall_following_task.step()
         elif tool.run_n_time_flag(self, 'asfawefoijwj'):

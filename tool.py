@@ -3,7 +3,7 @@ from itertools import repeat
 from more_itertools import peekable
 
 
-def run_n_time_flag(self, distinct_name, time=1):
+def run_n_time_flag(self, distinct_name, time=1, peek=False):
     """
     >>> class Something(object):
     ...     def hello(self):
@@ -27,7 +27,8 @@ def run_n_time_flag(self, distinct_name, time=1):
         rec[distinct_name] = time
 
     if rec[distinct_name] > 0:
-        rec[distinct_name] -= 1
+        if peek is False:
+            rec[distinct_name] -= 1
         return True
     else:
         return False
