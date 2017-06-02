@@ -2,9 +2,12 @@ import logging
 
 import sys
 
+import math
+
 import tool
 import tortoise as t
 
+# noinspection PyUnresolvedReferences
 from car_find_color import ColorTracingTask
 from beacon_detect import BeaconDetectionTask
 from turning import Turning
@@ -15,6 +18,10 @@ logging.getLogger('tortoise.p').setLevel(logging.WARN)
 logging.getLogger('tortoise.main').setLevel(logging.WARN)
 
 
+def duration2times(duration):
+    return int(math.ceil(duration/float(t.config.TORTOISE_WALK_PERIOD)))
+
+
 class Patio2(t.Task):
     logger = logging.getLogger('tortoise.patio2')
 
@@ -22,16 +29,24 @@ class Patio2(t.Task):
         super(Patio2, self).__init__()
 
         self.color_block_tracing = ColorTracingTask()
-
+        self.color_block_tracing.threshold_area = 120000
         self.b_2planter_task = BeaconDetectionTask()
+
         self.t_at_planter = Turning(-110)
+
         self.wall_following_task = PlanterWallFollower()
+
         self.t_before_feed_fish = Turning(-110)
+
         self.b_2fish_task = BeaconDetectionTask()
+        self.b_2fish_task.direction_constant = 4
+        self.b_2fish_task.threshold_area = 130000
+
         self.t_at_fish_food = Turning(-200)
+
         self.b_2communication_task = BeaconDetectionTask()
-        self.b_2communication_task.threshold_area = 140000
-        self.b_2communication_task.direction_constant = 5
+        self.b_2communication_task.threshold_area = 130000
+        self.b_2communication_task.direction_constant = 4
 
         self.step_manager = tool.StepManager()
 
@@ -59,7 +74,13 @@ class Patio2(t.Task):
                 self.t_at_planter.step,
                 lambda: not self.t_at_planter.finish_flag
             )
-        elif not self.wall_following_task.done:
+        elif (
+            tool.run_n_time_flag(self, 'faehiudcjr',time=duration2times(20 * 2))
+            or not self.wall_following_task.done
+        ):
+            if tool.run_n_time_flag(
+                    self, 'faehiudcjr', time=20*2):
+                self.wall_following_task.done = False
             self.wall_following_task.step()
         elif tool.run_n_time_flag(self, 'asfawefoijwj'):
             print '\033[0;32m{}\033[0m'.format('Turning to fish food')
@@ -95,9 +116,6 @@ class Patio2(t.Task):
             self.set_speeds_from_beacon_flag(self.b_2communication_task.turn_dir)
         else:
             sys.exit()
-
-
-
 
     def set_speeds_from_beacon_flag(self, flag):
         if flag == 'right':
