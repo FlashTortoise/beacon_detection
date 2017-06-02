@@ -1,4 +1,6 @@
 from collections import deque
+from itertools import repeat
+from more_itertools import peekable
 
 
 def run_n_time_flag(self, distinct_name, time=1):
@@ -36,29 +38,44 @@ class StepManager(object):
         self.tasks = deque()
 
     def need_step(self):
-        task_info = None
-        try:
-            task_info = self.tasks[0]
-        except IndexError:
-            return False
+        while True:
+            try:
+                task_info = self.tasks[0]
+            except IndexError:
+                return False
 
-        remaining_times = task_info['remaining_times']
-        if task_info['remaining_times'] is not None:
-            if task_info['remaining_times'] > 0:
-                return True
+            try:
+                p = task_info['need_iter'].peek()
+            except StopIteration:
+                p = False
+
+            if p is False:
+                self.tasks.popleft()
             else:
-                raise Exception('Bad condition')
+                return True
 
-    def add_n_times(self, task, times=1):
-        if not callable(task):
+    def add_n_times(self, step, times):
+        if not callable(step):
             raise Exception('task is not callable')
 
-        self.tasks.append(dict(callable=task, remaining_times=times))
+        self.tasks.append(dict(
+            callable=step,
+            need_iter=peekable(repeat(True, times))
+        ))
+
+    def add(self, step):
+        self.add_n_times(step, times=1)
+
+    def add_blocking(self, step, until):
+        self.tasks.append(dict(
+            callable=step,
+            need_iter=peekable(iter(until, None))
+        ))
 
     def step(self):
-        self.tasks[0]['remaining_times'] -= 1
+        need_iter = self.tasks[0]['need_iter'].next()
         task = self.tasks[0]['callable']
-        if self.tasks[0]['remaining_times'] == 0:
+        if not need_iter:
             self.tasks.popleft()
 
         return task()
@@ -76,15 +93,19 @@ if __name__ == '__main__':
                 return
 
             print 'raw running'
-            if self.executed_count == 5:
+            if self.executed_count == 3:
                 def other_fun():
                     print 'other fun run'
-                self.stepm.add_n_times(other_fun)
-
+                self.stepm.add_n_times(other_fun, 1)
 
                 def another_fun():
                     print 'another fun run'
                 self.stepm.add_n_times(another_fun, 2)
+
+                def another_another_fun():
+                    print 'another '*2 + 'fun run'
+                it = repeat(True, 2)
+                self.stepm.add_blocking(another_another_fun, it.next)
 
             self.executed_count += 1
 

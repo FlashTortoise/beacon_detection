@@ -10,7 +10,7 @@ import tortoise as t
 
 import turning as turn
 
-t.update_config(TORTOISE_WALK_PERIOD = 0.1)
+t.update_config(TORTOISE_WALK_PERIOD=0.1)
 eye = t.peripheral.eye
 
 
