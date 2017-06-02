@@ -45,7 +45,6 @@ class PlanterWallFollower(t.Task):
     def __init__(self):
         super(PlanterWallFollower, self).__init__()
         self.done = False
-        self.turning = turn.Turning()
 
         self.step_manager = tool.StepManager()
 

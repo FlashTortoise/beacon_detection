@@ -19,10 +19,11 @@ class Patio2(t.Task):
     def __init__(self):
         super(Patio2, self).__init__()
         self.b_2planter_task = BeaconDetectionTask()
+        self.t_at_planter = Turning(-110)
         self.wall_following_task = PlanterWallFollower()
-        self.turning_task = Turning()
+        self.t_before_feed_fish = Turning(-110)
         self.b_2fish_task = BeaconDetectionTask()
-        # 180d turn
+        self.t_at_fish_food = Turning(-200)
         self.b_2communication_task = BeaconDetectionTask()
 
         self.step_manager = tool.StepManager()
@@ -34,28 +35,26 @@ class Patio2(t.Task):
 
         if False:
             pass
-        # elif not self.beacon_task.done:
-        #     self.beacon_task.step()
-        #     print 'Area: {:9.1f}, direction: {:8s}'.format(
-        #         self.beacon_task.beacon_area, self.beacon_task.turn_dir)
-        #
-        #     self.set_speeds_from_beacon_flag(self.beacon_task.turn_dir)
-        # elif tool.run_n_time_flag(self, 'asdfaw'):
-        #     print '\033[0;32m{}\033[0m'.format('Turning when hit planter')
+        elif not self.b_2planter_task.done:
+            self.b_2planter_task.step()
+            print 'Area: {:9.1f}, direction: {:8s}'.format(
+                self.b_2planter_task.beacon_area, self.b_2planter_task.turn_dir)
 
-        #     self.turning_task.reset(-110)
-        #     self.step_manager.add_blocking(
-        #         self.turning_task.step,
-        #         lambda: not self.turning_task.finish_flag
-        #     )
+            self.set_speeds_from_beacon_flag(self.b_2planter_task.turn_dir)
+        elif tool.run_n_time_flag(self, 'asdfaw'):
+            print '\033[0;32m{}\033[0m'.format('Turning when hit planter')
+
+            self.step_manager.add_blocking(
+                self.t_at_planter.step,
+                lambda: not self.t_at_planter.finish_flag
+            )
         elif not self.wall_following_task.done:
             self.wall_following_task.step()
         elif tool.run_n_time_flag(self, 'asfawefoijwj'):
             print '\033[0;32m{}\033[0m'.format('Turning to fish food')
-            self.turning_task.reset(-110)
             self.step_manager.add_blocking(
-                self.turning_task.step,
-                lambda: not self.turning_task.finish_flag
+                self.t_before_feed_fish.step,
+                lambda: not self.t_before_feed_fish.finish_flag
             )
 
             def consume_photo():
@@ -72,10 +71,9 @@ class Patio2(t.Task):
             self.set_speeds_from_beacon_flag(self.b_2fish_task.turn_dir)
         elif tool.run_n_time_flag(self, 'yogokut'):
             print '\033[0;32m{}\033[0m'.format('Turning to communication')
-            self.turning_task.reset(-200)
             self.step_manager.add_blocking(
-                self.turning_task.step,
-                lambda: not self.turning_task.finish_flag
+                self.t_at_fish_food.step,
+                lambda: not self.t_at_fish_food.finish_flag
             )
         elif not self.b_2communication_task.done:
             print '\033[0;32m{}\033[0m'.format('Go to communication')

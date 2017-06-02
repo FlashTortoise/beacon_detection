@@ -20,7 +20,6 @@ class BeaconDetectionTask(t.Task):
     def __init__(self):
         super(BeaconDetectionTask, self).__init__()
         self.done = False
-        self.turning = turn.Turning()
 
         self.beacon_area = None
         self.turn_dir = 'middle'

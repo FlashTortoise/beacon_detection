@@ -59,16 +59,12 @@ def constrain(a, l, u):
 
 
 class Turning(Task):
-    def __init__(self):
+    def __init__(self, wanted_degree):
         super(Turning, self).__init__()
         self.c = PIDController(0.04, 0, 0)
-        self.target_yaw = 0
-        self.want_degree = 0
-        self.finish_flag = False
-
-    def reset(self, relative_angle):
         self.target_yaw = None
-        self.want_degree = relative_angle
+        self.want_degree = wanted_degree
+        self.finish_flag = False
 
     def step(self):
         print '\033[1;36m{}\033[0m'.format('TURNING START')
@@ -85,11 +81,12 @@ class Turning(Task):
         print 'target_yaw is ', self.target_yaw
 
         self.finish_flag = abs(self.target_yaw - deg) < 5
-        return self.finish_flag
 
         print '\033[1;36m{}\033[0m'.format('TURNING END')
 
+        return self.finish_flag
+
 if __name__ == '__main__':
     tt = Tortoise()
-    tt.task = Turning()
+    tt.task = Turning(90)
     tt.walk()
