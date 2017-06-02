@@ -7,24 +7,23 @@ import numpy as np
 # 1280*720
 
 import tortoise as t
-#import recording
 
 import turning as turn
-
-import time
 
 t.update_config(TORTOISE_WALK_PERIOD = 0.1)
 eye = t.peripheral.eye
 
 
-class beacon_detection(t.Task):
+class BeaconDetectionTask(t.Task):
     logger = logging.getLogger('tortoise.task.beacon')
 
     def __init__(self):
-        super(beacon_detection, self).__init__()
-        self.flag_beacon_end1 = False
-        self.turn_over = False
+        super(BeaconDetectionTask, self).__init__()
+        self.done = False
         self.turning = turn.Turning()
+
+        self.beacon_area = None
+        self.turn_dir = 'middle'
 
     def step(self):
 
@@ -58,7 +57,7 @@ class beacon_detection(t.Task):
 
         area_max = total_area[0]
         total_area.pop(0)
-        total_area_n1 = sum(total_area)
+        self.beacon_area = total_area_n1 = sum(total_area)
 
         for i in range(0, len(contours)):
             if m[i]['m00'] != 0:
@@ -88,41 +87,23 @@ class beacon_detection(t.Task):
         # print left_boundary
         # print right_bou
 
-        # if self.flag_beacon_end == True:
-        #     l, r = [0, 0]
-        # else:
         if total_area_n1 > 140000:
-            st1 = time.time()
-            while time.time() < st1 + 0.6:
-                l, r = [0.4, 0.4]
-                t.peripheral.wheels.set_lr(l, r)
-            self.turning.want_degree = -110
-            if self.turn_over == False:
-                while self.turn_over == False:
-                    self.turn_over = self.turning.step()
-            l, r = [0, 0]
-            self.flag_beacon_end1 = True
+            self.turn_dir = 'middle'
         else:
             if left_boundary <= cx <= right_boundary:
                 # print 'middle'
                 self.logger.info('beacon detected at center')
-                l, r=[0.4, 0.4]
-            if cx < left_boundary:
+                self.turn_dir = 'middle'
+            elif cx < left_boundary:
                 # turn left
                 self.logger.info('beacon detected at left')
-                l, r = [0.1, 0.4]
-            if cx > right_boundary:
+                self.turn_dir = 'left'
+            elif cx > right_boundary:
                 # turn right
                 self.logger.info('beacon detected at right')
-                l, r = [0.4, 0.1]
-
-        print "left"+str(l)
-        print "right"+str(r)
-        print "total_area_n1"+str(total_area_n1)
-
-        t.peripheral.wheels.set_lr(l, r)
+                self.turn_dir = 'right'
 
 if __name__ == '__main__':
     tttt = t.Tortoise()
-    tttt.task = beacon_detection()
+    tttt.task = BeaconDetectionTask()
     tttt.walk()
