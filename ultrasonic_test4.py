@@ -69,12 +69,12 @@ class PlanterWallFollower(t.Task):
         upper_boundary = 280
         error_distance = 10
 
-        if 20 < distance_front < 300:
+        if 20 < distance_front < 280:
             l, r = [0, 0]
             self.done = True
         else:
-            if distance_front_left > 5000 or distance_rear_left > 5000:
-                l, r = [0, 0]
+            if distance_front_left > 1000 or distance_rear_left > 1000:
+                l, r = [0.5, 0.5]
             else:
                 if distance_front_left == 0 and 10 < distance_rear_left < upper_boundary:
                     l, r = [0.2, 0.9]
@@ -83,71 +83,29 @@ class PlanterWallFollower(t.Task):
                 elif distance_front_left == 0 or distance_rear_left == 0:
                     l, r = [0, 0]
                 else:
-                    # if 200 < distance_front < 800:
-                    #     l, r = [0.7, 0.2]
-                    # else:
                         # case 1
                         if distance_front_left < lower_boundary and distance_rear_left < lower_boundary:
                             l, r = [0.5, 0.2]
                         # case 2
                         elif distance_front_left > upper_boundary and distance_rear_left > upper_boundary:
-                            if distance_front_left > 900 and distance_rear_left > 900 and distance_front > 500:
-                                self.step_manager.add_n_times(
-                                    setlr_closure(0.1, 0.9),
-                                    times=duration2times(0.7)
-                                )
-
-                                self.step_manager.add_n_times(
-                                    setlr_closure(0.3, 0.3),
-                                    times=duration2times(0.4)
-                                )
-
-                                self.step_manager.step()
-
-                            elif 500 < distance_front_left <= 900 or 500 < distance_rear_left <= 900:
-                                self.step_manager.add_n_times(
-                                    setlr_closure(0.2, 0.5),
-                                    times=duration2times(0.2)
-                                )
-                            else:
-                                if (distance_rear_left - distance_front_left) < 20:
-                                    self.step_manager.add_n_times(
-                                        setlr_closure(0.2, 0.5),
-                                        times=duration2times(0.2)
-                                    )
-                                else:
-                                    self.step_manager.add_n_times(
-                                        setlr_closure(0.5, 0.2),
-                                        times=duration2times(0.2)
-                                    )
-
+                            l, r = [0.1, 0.6]
                         # case 3
                         elif distance_front_left < lower_boundary and distance_rear_left > lower_boundary:
-                            l, r =[0.5, 0.2]
+                            l, r =[0.5, 0.1]
                         # case 4
                         elif distance_front_left > lower_boundary and distance_rear_left < lower_boundary:
-                            if distance_front_left > 500 or distance_rear_left < 10:
-                                l, r = [0.1, 0.5]
-                            else:
-                                self.step_manager.add_n_times(
-                                    setlr_closure(0.4, 0.4),
-                                    times=duration2times(0.5)
-                                )
-                                self.step_manager.add_n_times(
-                                    setlr_closure(0.1, 0.5),
-                                    times=1
-                                )
-
+                            self.step_manager.add_n_times(
+                                setlr_closure(0.4, 0.4),
+                                times=duration2times(0.3)
+                            )
+                            l, r = [0.1, 0.5]
                         # case 5
                         elif distance_front_left < upper_boundary and distance_rear_left > upper_boundary:
                             self.step_manager.add_n_times(
                                 setlr_closure(0.4, 0.4),
-                                times=duration2times(0.5)
+                                times=duration2times(0.3)
                             )
-                            self.step_manager.add_n_times(
-                                setlr_closure(0.5, 0.2),
-                                times=1
-                            )
+                            l, r = [0.5, 0.1]
                         # case 6
                         elif distance_front_left > upper_boundary and distance_rear_left < upper_boundary:
                             l, r = [0.1, 0.6]
@@ -159,10 +117,6 @@ class PlanterWallFollower(t.Task):
                                 l, r = [0.2, 0.5]
                             else:
                                 l, r = [0.4, 0.4]
-
-        # if distance_front<lower_boundary:
-        #     #rotate the car 90 degree clockwise
-        #     count += 1
 
         try:
             t.peripheral.wheels.set_lr(l, r)
