@@ -1,3 +1,5 @@
+from collections import deque
+
 from tortoise import p, Task, Tortoise
 
 
@@ -59,12 +61,15 @@ def constrain(a, l, u):
 
 
 class Turning(Task):
-    def __init__(self, wanted_degree):
+    def __init__(self, wanted_degree, deque_length=6):
         super(Turning, self).__init__()
         self.c = PIDController(0.04, 0, 0)
         self.target_yaw = None
         self.want_degree = wanted_degree
         self.finish_flag = False
+        self.tolerant_angle = 10
+
+        self.past_diffs = deque(maxlen=deque_length)
 
     def step(self):
         print '\033[1;36m{}\033[0m'.format('TURNING START')
@@ -75,12 +80,16 @@ class Turning(Task):
         deg = p.yaw.get()
         diff = constrain(self.c.run(self.target_yaw - deg), 0.4, -0.4)
 
-        print deg, diff
+        # print deg, diff
         p.wheels.set_diff(speed=0, diff=-diff)
-        print 'deg is', deg
-        print 'target_yaw is ', self.target_yaw
+        print 'deg: {:8f}  target yaw:{:8f}  '.format(self.target_yaw, deg),
 
-        self.finish_flag = abs(self.target_yaw - deg) < 5
+        self.past_diffs.append(self.target_yaw-deg)
+        average_diff = abs(sum(
+            [angle for angle in self.past_diffs]
+        ))/float(len(self.past_diffs))
+        print 'avg: {}'.format(average_diff)
+        self.finish_flag = average_diff < self.tolerant_angle
 
         print '\033[1;36m{}\033[0m'.format('TURNING END')
 
