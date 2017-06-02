@@ -24,6 +24,9 @@ class BeaconDetectionTask(t.Task):
         self.beacon_area = None
         self.turn_dir = 'middle'
 
+        self.direction_constant = 2
+        self.threshold_area = 140000
+
     def step(self):
         print '\033[1;36m{}\033[0m'.format('BEACON DETECT START')
 
@@ -79,15 +82,15 @@ class BeaconDetectionTask(t.Task):
 
         error_percent = 0.05  # 1%
 
-        left_boundary = picture_size[1] / 2 - picture_size[1] * error_percent
-        right_boundary = picture_size[1] / 2 + picture_size[1] * error_percent
+        left_boundary = picture_size[1] / self.direction_constant - picture_size[1] * error_percent
+        right_boundary = picture_size[1] / self.direction_constant + picture_size[1] * error_percent
 
         # print picture_size[1]
         # print cx
         # print left_boundary
         # print right_bou
 
-        if total_area_n1 > 140000:
+        if total_area_n1 > self.threshold_area:
             self.done = True
         else:
             if left_boundary <= cx <= right_boundary:

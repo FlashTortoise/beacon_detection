@@ -25,6 +25,8 @@ class Patio2(t.Task):
         self.b_2fish_task = BeaconDetectionTask()
         self.t_at_fish_food = Turning(-200)
         self.b_2communication_task = BeaconDetectionTask()
+        self.b_2communication_task.threshold_area = 140000
+        self.b_2communication_task.direction_constant = 5
 
         self.step_manager = tool.StepManager()
 
