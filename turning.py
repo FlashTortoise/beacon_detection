@@ -64,9 +64,14 @@ class Turning(Task):
         self.c = PIDController(0.04, 0, 0)
         self.target_yaw = 0
         self.want_degree = 0
+        self.finish_flag = False
+
+    def reset(self, relative_angle):
+        self.target_yaw = None
+        self.want_degree = relative_angle
 
     def step(self):
-        if self.target_yaw == 0:
+        if self.target_yaw is None:
             self.target_yaw = p.yaw.get() + self.want_degree
 
         deg = p.yaw.get()
@@ -77,7 +82,8 @@ class Turning(Task):
         print 'deg is', deg
         print 'target_yaw is ', self.target_yaw
 
-        return abs(self.target_yaw - deg) < 5
+        self.finish_flag = abs(self.target_yaw - deg) < 5
+        return self.finish_flag
 
 
 if __name__ == '__main__':
