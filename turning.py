@@ -71,6 +71,8 @@ class Turning(Task):
         self.want_degree = relative_angle
 
     def step(self):
+        print '\033[1;36m{}\033[0m'.format('TURNING START')
+
         if self.target_yaw is None:
             self.target_yaw = p.yaw.get() + self.want_degree
 
@@ -85,6 +87,7 @@ class Turning(Task):
         self.finish_flag = abs(self.target_yaw - deg) < 5
         return self.finish_flag
 
+        print '\033[1;36m{}\033[0m'.format('TURNING END')
 
 if __name__ == '__main__':
     tt = Tortoise()

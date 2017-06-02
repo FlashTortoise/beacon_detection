@@ -26,6 +26,7 @@ class BeaconDetectionTask(t.Task):
         self.turn_dir = 'middle'
 
     def step(self):
+        print '\033[1;36m{}\033[0m'.format('BEACON DETECT START')
 
         flag = 0
         frame = eye.see()
@@ -88,7 +89,7 @@ class BeaconDetectionTask(t.Task):
         # print right_bou
 
         if total_area_n1 > 140000:
-            self.turn_dir = 'middle'
+            self.done = True
         else:
             if left_boundary <= cx <= right_boundary:
                 # print 'middle'
@@ -102,6 +103,9 @@ class BeaconDetectionTask(t.Task):
                 # turn right
                 self.logger.info('beacon detected at right')
                 self.turn_dir = 'right'
+
+        print '\033[1;36m{}\033[0m'.format('BEACON DETECT END')
+
 
 if __name__ == '__main__':
     tttt = t.Tortoise()

@@ -65,11 +65,12 @@ class PlanterWallFollower(t.Task):
         distance_front_left = t.p.ranging.get(4)
         distance_rear_left = t.p.ranging.get(3)
 
-        lower_boundary = 180
-        upper_boundary = 280
+        lower_boundary = 150
+        upper_boundary = 220
         error_distance = 10
 
-        if 20 < distance_front < 280:
+        print '\033[1;36m{}\033[0m'.format('WALL FOLLOWING START')
+        if 20 < distance_front < 400:
             l, r = [0, 0]
             self.done = True
         else:
@@ -122,6 +123,8 @@ class PlanterWallFollower(t.Task):
             t.peripheral.wheels.set_lr(l, r)
         except UnboundLocalError:
             pass
+
+        print '\033[1;36m{}\033[0m'.format('WALL FOLLOWING END')
 
 
 if __name__ == '__main__':
