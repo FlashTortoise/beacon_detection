@@ -31,7 +31,7 @@ t.update_config(TORTOISE_WALK_PERIOD = 0.1)
 
 
 def duration2times(duration):
-    return math.ceil(duration/float(t.config.TORTOISE_WALK_PERIOD))
+    return int(math.ceil(duration/float(t.config.TORTOISE_WALK_PERIOD)))
 
 
 def setlr_closure(l, r):
@@ -51,7 +51,7 @@ class PlanterWallFollower(t.Task):
 
     def step(self):
         if self.step_manager.need_step():
-            self.step()
+            self.step_manager.step()
             return
 
         # distance_set = distance()
@@ -164,12 +164,16 @@ class PlanterWallFollower(t.Task):
         #     #rotate the car 90 degree clockwise
         #     count += 1
 
-        t.peripheral.wheels.set_lr(l, r)
+        try:
+            t.peripheral.wheels.set_lr(l, r)
+        except UnboundLocalError:
+            pass
 
 
 if __name__ == '__main__':
-    class TestTask(t.task):
+    class TestTask(t.Task):
         def __init__(self):
+            super(TestTask, self).__init__()
             self.task = PlanterWallFollower()
 
         def step(self):
